@@ -9,7 +9,8 @@ import (
 )
 
 type uploadRequest struct {
-	IDCardNumber string `json:"id_card_number"`
+	IDCardNumber string `form:"id_card_number"`
+	BankNumber   string `form:"bank_number"`
 }
 
 func main() {
@@ -46,7 +47,23 @@ func upload(c *fiber.Ctx) error {
 		})
 	}
 
-	fmt.Println(idCardImage)
+	var bankImage *multipart.FileHeader
+	bankImage, err = c.FormFile("bank_image")
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": "Bad Request",
+		})
+	}
+
+	fmt.Printf("id_card_number %s\n", body.IDCardNumber)
+	if idCardImage != nil {
+		fmt.Printf("id_card_image name %s\n", idCardImage.Filename)
+	}
+
+	fmt.Printf("bank_number %s\n", body.BankNumber)
+	if bankImage != nil {
+		fmt.Printf("id_card_image name %s\n", bankImage.Filename)
+	}
 
 	return c.JSON(fiber.Map{
 		"message": "Success",

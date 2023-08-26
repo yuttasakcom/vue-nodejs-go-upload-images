@@ -19,17 +19,28 @@ router.post(
     {
       name: 'id_card_image',
       maxCount: 1
+    },
+    {
+      name: 'bank_image',
+      maxCount: 1
     }
   ]),
   async (ctx) => {
     const form = new FormData()
     const idCardNumber = ctx.request.body.id_card_number
     const idCardImage = ctx.files.id_card_image[0]
+    const bankNumber = ctx.request.body.bank_number
+    const bankImage = ctx.files.bank_image[0]
 
     form.append('id_card_number', idCardNumber)
     form.append('id_card_image', idCardImage.buffer, {
       filename: idCardImage.originalname,
       contentType: idCardImage.mimetype
+    })
+    form.append('bank_number', bankNumber)
+    form.append('bank_image', bankImage.buffer, {
+      filename: bankImage.originalname,
+      contentType: bankImage.mimetype
     })
 
     const res = await axios.post('http://0.0.0.0:8081/upload', form, {
