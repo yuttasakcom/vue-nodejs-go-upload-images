@@ -23,9 +23,12 @@
         <div class="flex justify-end">
           <h2 class="ml-8 flex h-full items-center">
             <span class="text-xs">Developed by&nbsp;</span>
-            <a class="font-semibold" target="_blank" href="https://github.com/yuttasakcom">{{
-              developer
-            }}</a>
+            <a
+              class="font-semibold"
+              target="_blank"
+              href="https://github.com/yuttasakcom/vue-nodejs-go-upload-images"
+              >{{ developer }}</a
+            >
           </h2>
         </div>
       </div>
