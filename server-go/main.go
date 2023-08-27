@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"mime/multipart"
+	"sync"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -69,6 +70,14 @@ func uploadHandler(awsCfg AWSConfig) func(*fiber.Ctx) error {
 			})
 		}
 
+		wg := new(sync.WaitGroup)
+		wg.Add(2)
+
+		go func() {
+			uploadImageToS3(awsCfg, idCardImage)
+			wg.Done()
+		}()
+
 		var bankImage *multipart.FileHeader
 		bankImage, err = c.FormFile("bank_image")
 		if err != nil {
@@ -76,6 +85,12 @@ func uploadHandler(awsCfg AWSConfig) func(*fiber.Ctx) error {
 				"message": "Bad Request",
 			})
 		}
+		go func() {
+			uploadImageToS3(awsCfg, bankImage)
+			wg.Done()
+		}()
+
+		wg.Wait()
 
 		fmt.Printf("id_card_number %s\n", body.IDCardNumber)
 		if idCardImage != nil {
@@ -87,40 +102,35 @@ func uploadHandler(awsCfg AWSConfig) func(*fiber.Ctx) error {
 			fmt.Printf("bank_image name %s\n", bankImage.Filename)
 		}
 
-		sess, err := session.NewSession(&aws.Config{
-			Region: aws.String(awsCfg.Region),
-		})
-		if err != nil {
-			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-				"message": "Internal Server Error(NewSession AWS Failed)",
-			})
-		}
-
-		file, err := idCardImage.Open()
-		if err != nil {
-			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-				"message": "Internal Server Error(Open ID Card Image Failed)",
-			})
-		}
-		defer file.Close()
-
-		svc := s3.New(sess)
-		input := &s3.PutObjectInput{
-			Body:   file,
-			Bucket: aws.String(awsCfg.BucketName),
-			Key:    aws.String(idCardImage.Filename),
-		}
-		_, err = svc.PutObject(input)
-		if err != nil {
-			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-				"message": "Internal Server Error(PutObject AWS Failed))",
-				"error":   err.Error(),
-				"config":  awsCfg,
-			})
-		}
-
 		return c.JSON(fiber.Map{
 			"message": "Success",
 		})
 	}
+}
+
+func uploadImageToS3(awsCfg AWSConfig, fileHeader *multipart.FileHeader) error {
+	file, err := fileHeader.Open()
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+	sess, err := session.NewSession(&aws.Config{
+		Region: aws.String(awsCfg.Region),
+	})
+	if err != nil {
+		return err
+	}
+
+	svc := s3.New(sess)
+	input := &s3.PutObjectInput{
+		Body:   file,
+		Bucket: aws.String(awsCfg.BucketName),
+		Key:    aws.String(fileHeader.Filename),
+	}
+	_, err = svc.PutObject(input)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
