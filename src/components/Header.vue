@@ -29,6 +29,11 @@
               href="https://github.com/yuttasakcom/vue-nodejs-go-upload-images"
               >{{ developer }}</a
             >
+            <img
+              class="h-8 w-8 rounded-3xl object-contain border border-solid border-brand-gray-1 ml-2"
+              src="@/assets/yo.jpeg"
+              alt="github"
+            />
           </h2>
         </div>
       </div>
