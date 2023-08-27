@@ -9,7 +9,7 @@
               class="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark"
             >
               <div class="border-b border-stroke py-4 px-7 dark:border-strokedark">
-                <h3 class="font-medium text-black dark:text-white">Your Photo</h3>
+                <h3 class="font-medium text-black dark:text-white">Upload Image to AWS(S3)</h3>
               </div>
               <div class="p-7">
                 <form @submit.prevent="submit">
