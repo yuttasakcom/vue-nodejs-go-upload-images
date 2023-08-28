@@ -54,6 +54,8 @@ func main() {
 
 func uploadHandler(awsCfg AWSConfig) func(*fiber.Ctx) error {
 	return func(c *fiber.Ctx) error {
+		apiKey := c.Get("x-api-key")
+		fmt.Printf("x-api-key %s\n", apiKey)
 		var body uploadRequest
 		var err error
 		if err = c.BodyParser(&body); err != nil {

@@ -44,7 +44,10 @@ router.post(
     })
 
     const res = await axios.post('http://0.0.0.0:8081/upload', form, {
-      headers: form.getHeaders()
+      headers: {
+        'x-api-key': '1234567890',
+        ...form.getHeaders()
+      }
     })
 
     ctx.body = res.data
